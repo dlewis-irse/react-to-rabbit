@@ -29,6 +29,7 @@ export async function startServer () {
     });
 
     console.log('WebSocket server running on *:8080');
+    return wss; // Return the WebSocket server instance
   } catch (error) {
     console.error('Server failed to start:', error);
     process.exit(1);

@@ -1,6 +1,8 @@
 {
   "testEnvironment": "node",
   "moduleFileExtensions": ["js", "json"],
-  "transform": {},
+  "transform": {
+    "^.+\\.js$": "babel-jest"
+  },
   "testMatch": ["**/*.test.js"]
 }

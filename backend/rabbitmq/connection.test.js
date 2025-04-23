@@ -30,7 +30,9 @@ describe('connectRabbitMQ', () => {
   });
 
   it('should throw an error if connection fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockConnect.mockRejectedValue(new Error('Connection failed'));
     await expect(connectRabbitMQ()).rejects.toThrow('Connection failed');
+    consoleErrorSpy.mockRestore();
   });
 });

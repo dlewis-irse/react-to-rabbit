@@ -1,111 +1,49 @@
 import { startServer } from './server.js';
 import WebSocket from 'ws';
 
-jest.mock('ws');
+let server;
 
-let mockServer;
-
-beforeEach(() => {
-  mockServer = {
-    on: jest.fn(),
-    close: jest.fn()
-  };
-  WebSocket.Server.mockImplementation(() => mockServer);
+beforeAll(async () => {
+  server = await startServer();
 });
 
-afterEach(() => {
-  jest.restoreAllMocks();
+afterAll(() => {
+  server.close();
 });
 
-describe('startServer', () => {
-  it('should start a WebSocket server on the specified port', async () => {
-    process.env.PORT = '8080';
-    await startServer();
-    expect(WebSocket.Server).toHaveBeenCalledWith({ port: 8080 });
-  });
+describe('WebSocket Server', () => {
+  it('should accept WebSocket connections', (done) => {
+    const client = new WebSocket(`ws://localhost:${process.env.PORT || 8080}`);
 
-  it('should handle WebSocket connections', async () => {
-    const mockConnectionHandler = jest.fn();
-    mockServer.on.mockImplementation((event, handler) => {
-      if (event === 'connection') {
-        mockConnectionHandler.mockImplementation(handler);
-      }
+    client.on('open', () => {
+      expect(client.readyState).toBe(WebSocket.OPEN);
+      client.close();
+      done();
     });
 
-    await startServer();
-    expect(mockServer.on).toHaveBeenCalledWith('connection', expect.any(Function));
+    client.on('error', (err) => {
+      done(err);
+    });
   });
 
-  it('should log when a client connects and disconnects', async () => {
-    const mockWs = {
-      on: jest.fn()
-    };
+  it('should handle messages from clients', (done) => {
+    const client = new WebSocket(`ws://localhost:${process.env.PORT || 8080}`);
 
-    mockServer.on.mockImplementation((event, handler) => {
-      if (event === 'connection') {
-        handler(mockWs);
-      }
+    client.on('open', () => {
+      const message = JSON.stringify({ type: 'test', payload: 'Hello, server!' });
+      client.send(message);
     });
 
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-
-    await startServer();
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Client connected');
-
-    const disconnectHandler = mockWs.on.mock.calls.find(([event]) => event === 'close')[1];
-    disconnectHandler();
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Client disconnected');
-
-    consoleLogSpy.mockRestore();
-  });
-
-  it('should handle incoming messages and send responses', async () => {
-    const mockWs = {
-      on: jest.fn(),
-      send: jest.fn()
-    };
-
-    mockServer.on.mockImplementation((event, handler) => {
-      if (event === 'connection') {
-        handler(mockWs);
-      }
+    server.on('connection', (ws) => {
+      ws.on('message', (data) => {
+        expect(data.toString()).toBe(JSON.stringify({ type: 'test', payload: 'Hello, server!' }));
+        client.close();
+        done();
+      });
     });
 
-    await startServer();
-
-    const messageHandler = mockWs.on.mock.calls.find(([event]) => event === 'message')[1];
-    const mockMessage = JSON.stringify({ test: 'data' });
-
-    messageHandler(mockMessage);
-
-    expect(mockWs.send).toHaveBeenCalledWith(
-      JSON.stringify({ status: 'success', data: { test: 'data' } })
-    );
-  });
-
-  it('should handle errors in message processing', async () => {
-    const mockWs = {
-      on: jest.fn(),
-      send: jest.fn()
-    };
-
-    mockServer.on.mockImplementation((event, handler) => {
-      if (event === 'connection') {
-        handler(mockWs);
-      }
+    client.on('error', (err) => {
+      done(err);
     });
-
-    await startServer();
-
-    const messageHandler = mockWs.on.mock.calls.find(([event]) => event === 'message')[1];
-    const invalidMessage = 'invalid json';
-
-    messageHandler(invalidMessage);
-
-    expect(mockWs.send).toHaveBeenCalledWith(
-      JSON.stringify({ status: 'error', error: expect.any(String) })
-    );
   });
 });

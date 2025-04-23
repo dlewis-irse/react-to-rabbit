@@ -1,5 +1,9 @@
 # Task Tracker
 
+## Project Goal Summary:
+
+The primary goal is to establish a clean and user-friendly pattern for a React application to trigger backend tasks (potentially long-running) and receive their results asynchronously. This system should abstract away the complexities of a message queue (RabbitMQ) and WebSocket communication (Socket.IO), presenting a request-response-like experience to the React developer. The backend transport layer (NodeJS) should be easily extensible to support various types of requests through a plugin architecture, and the worker services processing these requests should be implementable in different languages (specifically Python and NodeJS). The system must support sending and receiving full JSON objects and streaming data.
+
 ## React Developer Tasks
 
 - [ ] Implement `makeBackendRequest` function to send JSON payloads to the backend.
@@ -45,3 +49,5 @@
 ## Testing Standards
 
 - Use Jest as the testing framework for all unit tests.
+- Prefer dependency injection over mocking for testing components and services.
+- Ensure tests are isolated and do not rely on external systems like RabbitMQ or WebSocket servers unless explicitly required.
