@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import { connectRabbitMQ } from '../rabbitmq/connection.js';
+import { routeRequest } from '../index.js';
 
 export async function startServer () {
   try {
@@ -18,9 +19,11 @@ export async function startServer () {
       ws.on('message', async (message) => {
         try {
           const request = JSON.parse(message.toString());
-          // Handle the request here
-          console.log('Received request:', request);
-          ws.send(JSON.stringify({ status: 'success', data: request }));
+          const { requestType, payload } = request;
+          const sendChunk = (chunk) => {
+            ws.send(JSON.stringify({ requestId: request.requestId, ...chunk }));
+          };
+          await routeRequest(requestType, payload, sendChunk);
         } catch (error) {
           console.error('Error handling message:', error);
           ws.send(JSON.stringify({ status: 'error', error: error.message }));

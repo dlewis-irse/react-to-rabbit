@@ -1,6 +1,7 @@
 import createWebSocketClient from './websocketClient';
 
-const client = createWebSocketClient('ws://localhost:8080');
+const serverPort = import.meta.env.VITE_SERVER_PORT || 8080;
+const client = createWebSocketClient(`ws://localhost:${serverPort}`);
 client.connect();
 
 export function makeBackendRequest(requestType, payload, onStreamChunk) {
@@ -20,7 +21,7 @@ export function makeBackendRequest(requestType, payload, onStreamChunk) {
     } else {
       client.onMessage(requestId, (response) => {
         client.removeMessageHandler(requestId);
-        resolve(response);
+        resolve(response.data);
       });
     }
 
