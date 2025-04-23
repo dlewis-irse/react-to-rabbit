@@ -17,12 +17,14 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 - [x] Route incoming requests to RabbitMQ based on `requestType`.
 - [x] Maintain mapping of request IDs to WebSocket connections.
 - [x] Consume responses from RabbitMQ and relay them to WebSocket clients.
+- [x] Update WebSocket server to use ES6 import syntax.
 - [ ] Implement plugin architecture for request handlers.
-- [ ] Update WebSocket server to use ES6 import syntax.
-- [ ] Replace Node.js with Bun.js for backend execution.
+- [x] Replace Node.js with Bun.js for backend execution.
+- [x] Implement error handling for RabbitMQ disconnections.
 - [ ] Add support for streaming data in the backend.
-- [ ] Write unit tests for all backend components (Test Driven Development).
-- [ ] Refactor backend code to follow reusable patterns.
+- [ ] Add logging for RabbitMQ and WebSocket server events.
+- [ ] Document the WebSocket server and RabbitMQ connection setup.
+- [ ] Add configuration validation to ensure correct settings at startup.
 
 ## Worker Service Developer Tasks
 

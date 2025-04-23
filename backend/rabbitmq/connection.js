@@ -2,19 +2,43 @@ import rabbitmqConfig from '../config/rabbitmq.js';
 import amqp from 'amqplib';
 
 export async function connectRabbitMQ () {
-  try {
-    const connection = await amqp.connect(rabbitmqConfig.url);
-    const channel = await connection.createChannel();
+  let connection;
+  let channel;
 
-    // Create exchange
-    await channel.assertExchange(rabbitmqConfig.exchange, 'direct', { durable: true });
+  async function createConnection() {
+    try {
+      connection = await amqp.connect(rabbitmqConfig.url);
+      channel = await connection.createChannel();
 
-    // Create response exchange
-    await channel.assertExchange(rabbitmqConfig.responseExchange, 'direct', { durable: true });
+      // Create exchange
+      await channel.assertExchange(rabbitmqConfig.exchange, 'direct', { durable: true });
 
-    return { connection, channel };
-  } catch (error) {
-    console.error('RabbitMQ connection failed:', error);
-    throw error;
+      // Create response exchange
+      await channel.assertExchange(rabbitmqConfig.responseExchange, 'direct', { durable: true });
+
+      console.log('RabbitMQ connection established');
+
+      // Handle connection close
+      connection.on('close', async () => {
+        console.error('RabbitMQ connection closed. Attempting to reconnect...');
+        await reconnect();
+      });
+
+      return { connection, channel };
+    } catch (error) {
+      console.error('RabbitMQ connection failed:', error);
+      throw error;
+    }
   }
+
+  async function reconnect() {
+    try {
+      await createConnection();
+    } catch (error) {
+      console.error('Reconnection attempt failed. Retrying in 5 seconds...', error);
+      setTimeout(reconnect, 5000);
+    }
+  }
+
+  return await createConnection();
 }
