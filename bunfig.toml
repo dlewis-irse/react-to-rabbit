@@ -1,0 +1,7 @@
+[install.scopes]
+
+"@marketing" = {
+  username = "$CODEHUB_USERNAME",
+  password = "$CODEHUB_PASSWORD",
+  url = "https://npm.codehub.esri.com"
+}
