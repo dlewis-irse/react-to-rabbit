@@ -20,91 +20,56 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 
 # TODO
 
-## React Developer Tasks
+## Functionality Tasks
 
-- [x] Set up client using Vite for development and build.
-- [x] Set up WebSocket client utility in the React app.
-- [x] Implement `makeBackendRequest` function to send JSON payloads to the backend.
-- [x] Add a testing interface in `App.jsx` to utilize `makeBackendRequest`.
-- [x] Clean up `App.jsx` to remove Vite boilerplate and simplify the UI.
-- [ ] Test the `makeBackendRequest` function.
-- [ ] Document the `makeBackendRequest` API.
-- [ ] Handle streaming data in the UI.
-- [ ] Add error handling in the UI.
-- [ ] (Optional) Set up state management for handling complex state.
+### React Developer Tasks
 
-## Backend Developer Tasks
+- [ ] Test the `makeBackendRequest` function to ensure it handles streaming data and errors correctly.
+- [ ] Handle streaming data in the UI by providing real-time feedback to the user.
+- [ ] Add error handling in the UI to display meaningful messages when requests fail.
+- [ ] (Optional) Set up state management for handling complex state, such as streaming data and error states.
 
-- [x] Set up WebSocket server to handle connections from React clients.
-- [x] Route incoming requests to RabbitMQ based on `requestType`.
-- [x] Maintain mapping of request IDs to WebSocket connections.
-- [x] Consume responses from RabbitMQ and relay them to WebSocket clients.
-- [x] Update WebSocket server to use ES6 import syntax.
-- [x] Implement plugin architecture for request handlers.
-- [x] Replace Node.js with Bun.js for backend execution.
-- [x] Implement error handling for RabbitMQ disconnections.
-- [ ] Add support for streaming data in the backend.
-- [ ] Add logging for RabbitMQ and WebSocket server events.
-- [ ] Document the WebSocket server and RabbitMQ connection setup.
-- [ ] Add configuration validation to ensure correct settings at startup.
-- [ ] Implement a handler for `testRequest` in the backend.
-- [ ] Route the `testRequest` to the appropriate handler in the backend.
-- [ ] Refactor the WebSocket server to publish requests to RabbitMQ instead of directly invoking handlers.
-- [ ] Update the WebSocket server to listen for responses from RabbitMQ and relay them to the React client.
-- [ ] Remove direct coupling between the WebSocket server and `testRequestHandler.js`.
+### Backend Developer Tasks
 
-## Worker Service Developer Tasks
+- [ ] Add logging for RabbitMQ and WebSocket server events using a logging library.
+- [ ] Add configuration validation to ensure correct settings at startup, such as RabbitMQ URLs and exchange names.
 
-- [ ] Implement RabbitMQ consumers for worker services (Python/NodeJS).
-- [ ] Publish JSON responses to RabbitMQ with original request IDs.
-- [ ] Support streaming data by publishing chunks to RabbitMQ.
-- [ ] Write unit tests for worker services (Test Driven Development).
-- [ ] Refactor worker service code to follow reusable patterns.
-- [ ] Implement a RabbitMQ consumer for the worker service to process `testRequest`.
-- [ ] Publish a response to RabbitMQ with the original request ID.
-- [ ] Implement a standalone worker service for `testRequestHandler.js` that listens for messages from RabbitMQ.
-- [ ] Ensure the worker service processes the request and publishes the response back to RabbitMQ with the original request ID.
-- [ ] Support streaming data by publishing chunks to RabbitMQ.
-- [x] Implement a `registerHandler` utility to abstract RabbitMQ setup and message handling.
-- [x] Refactor `testRequestHandler.js` to use the `registerHandler` utility.
-- [x] Ensure the refactored `testRequestHandler` aligns with the desired structure.
+### Multi-Language Support
+
+- [ ] Add support for creating services in Python.
+  - [ ] Implement a Python version of the `registerHandler` utility.
+  - [ ] Create a sample Python service to demonstrate functionality.
+  - [ ] Ensure compatibility with RabbitMQ and the existing architecture.
+- [ ] Add support for creating services in Go.
+  - [ ] Implement a Go version of the `registerHandler` utility.
+  - [ ] Create a sample Go service to demonstrate functionality.
+  - [ ] Ensure compatibility with RabbitMQ and the existing architecture.
+
+### Logging and Observability
+
+- [ ] Implement centralized logging for all components (client, server, RabbitMQ, and processing agents).
+  - [ ] Use a logging library (e.g., Winston for Node.js, Loguru for Python, and Logrus for Go).
+  - [ ] Ensure logs include timestamps, log levels, and contextual information.
+- [ ] Add real-time observability for communication between components.
+  - [ ] Implement a dashboard to visualize messages sent and received by the client, server, RabbitMQ, and processing agents.
+  - [ ] Use WebSocket or a similar technology to stream logs and events to the dashboard in real time.
+  - [ ] Include filters to view specific components or message types.
 
 ## Testing Tasks
 
-- [x] Write unit tests for `connectRabbitMQ` to test RabbitMQ connection and error handling.
-- [x] Write unit tests for `startServer` to test WebSocket server functionality and error handling.
-- [x] Write unit tests for `websocketClient` to test WebSocket client functionality.
-- [ ] Write unit tests for `makeBackendRequest` to test backend request handling.
-- [ ] Write unit tests for environment variable loading.
-- [ ] Write unit tests for `rabbitmqConfig` to validate default values.
-- [ ] Write unit tests for the `testRequest` handler in the backend.
-- [ ] Write unit tests for the RabbitMQ consumer in the worker service.
-- [ ] Write integration tests to verify the end-to-end flow from the React client to the worker service and back.
-- [ ] Write unit tests for the RabbitMQ publisher in the WebSocket server.
-- [ ] Write unit tests for the `registerHandler` utility.
-- [ ] Verify the refactored `testRequestHandler` works as expected.
+- [ ] Write unit tests for `makeBackendRequest` to test backend request handling, including streaming and error scenarios.
+- [ ] Write unit tests for the `registerHandler` utility to ensure it correctly handles RabbitMQ setup and message processing.
+- [ ] Write integration tests to verify the end-to-end flow from the React client to the worker service and back, including streaming data.
+- [ ] Write unit tests for the Python version of the `registerHandler` utility.
+- [ ] Write unit tests for the Go version of the `registerHandler` utility.
+- [ ] Write integration tests to verify multi-language service compatibility with the existing architecture.
+- [ ] Write tests for the logging functionality to ensure logs are generated correctly and include all required information.
+- [ ] Write tests for the real-time observability dashboard to verify it displays accurate and up-to-date information.
 
-# Design Flaw Identified
+## Documentation Tasks
 
-### Current Issue
-The `testRequestHandler.js` is tightly coupled to the WebSocket server, which violates the intended architecture. Handlers should not be directly invoked by the WebSocket server. Instead, they should operate as standalone services that listen for messages broadcast through RabbitMQ. Responses should be sent back through RabbitMQ to the WebSocket server, which will then transmit them to the React client.
-
-### Tasks to Address the Design Flaw
-
-#### Backend Developer Tasks
-- [x] Refactor the WebSocket server to publish requests to RabbitMQ instead of directly invoking handlers.
-- [x] Update the WebSocket server to listen for responses from RabbitMQ and relay them to the React client.
-- [x] Remove direct coupling between the WebSocket server and `testRequestHandler.js`.
-
-#### Worker Service Developer Tasks
-- [x] Implement a standalone worker service for `testRequestHandler.js` that listens for messages from RabbitMQ.
-- [x] Ensure the worker service processes the request and publishes the response back to RabbitMQ with the original request ID.
-- [x] Support streaming data by publishing chunks to RabbitMQ.
-
-#### Testing Tasks
-- [x] Write integration tests to verify the end-to-end flow from the React client to the worker service and back.
-- [x] Write unit tests for the RabbitMQ consumer in the worker service.
-- [x] Write unit tests for the RabbitMQ publisher in the WebSocket server.
-
-
-
+- [ ] Update `README.md` with architecture details, including the role of RabbitMQ, WebSocket server, and worker services.
+- [ ] Add usage instructions for running the project, including environment variable setup and starting the services.
+- [ ] Document the `registerHandler` utility, including its API, parameters, and examples of usage.
+- [ ] Document the `makeBackendRequest` API, including its parameters, return values, and examples of usage.
+- [ ] Add testing guidelines to the `README.md`, including how to run unit and integration tests and interpret the results.
