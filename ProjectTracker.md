@@ -2,7 +2,7 @@
 
 ## Project Goal Summary
 
-The primary goal is to establish a clean and user-friendly pattern for a React application to trigger backend tasks (potentially long-running) and receive their results asynchronously. This system should abstract away the complexities of a message queue (RabbitMQ) and WebSocket communication (Socket.IO), presenting a request-response-like experience to the React developer. The backend transport layer (NodeJS) should be easily extensible to support various types of requests through a plugin architecture, and the worker services processing these requests should be implementable in different languages (specifically Python and NodeJS). The system must support sending and receiving full JSON objects and streaming data.
+The primary goal is to establish a clean and user-friendly pattern for a React application to trigger backend tasks (potentially long-running) and receive their results asynchronously. This system should abstract away the complexities of a message queue (RabbitMQ) and WebSocket communication (Socket.IO), presenting a request-response-like experience to the React developer. The backend transport layer (NodeJS) should be easily extensible to support various types of requests through a plugin architecture. Worker services processing these requests should be standalone and communicate exclusively through RabbitMQ, ensuring loose coupling between components. The WebSocket server should act as a bridge, relaying requests from the React client to RabbitMQ and responses from RabbitMQ back to the client. The system must support sending and receiving full JSON objects and streaming data.
 
 ## Coding Standards
 
@@ -49,6 +49,9 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 - [ ] Add configuration validation to ensure correct settings at startup.
 - [ ] Implement a handler for `testRequest` in the backend.
 - [ ] Route the `testRequest` to the appropriate handler in the backend.
+- [ ] Refactor the WebSocket server to publish requests to RabbitMQ instead of directly invoking handlers.
+- [ ] Update the WebSocket server to listen for responses from RabbitMQ and relay them to the React client.
+- [ ] Remove direct coupling between the WebSocket server and `testRequestHandler.js`.
 
 ## Worker Service Developer Tasks
 
@@ -59,6 +62,9 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 - [ ] Refactor worker service code to follow reusable patterns.
 - [ ] Implement a RabbitMQ consumer for the worker service to process `testRequest`.
 - [ ] Publish a response to RabbitMQ with the original request ID.
+- [ ] Implement a standalone worker service for `testRequestHandler.js` that listens for messages from RabbitMQ.
+- [ ] Ensure the worker service processes the request and publishes the response back to RabbitMQ with the original request ID.
+- [ ] Support streaming data by publishing chunks to RabbitMQ.
 
 ## Testing Tasks
 
@@ -70,6 +76,30 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 - [ ] Write unit tests for `rabbitmqConfig` to validate default values.
 - [ ] Write unit tests for the `testRequest` handler in the backend.
 - [ ] Write unit tests for the RabbitMQ consumer in the worker service.
+- [ ] Write integration tests to verify the end-to-end flow from the React client to the worker service and back.
+- [ ] Write unit tests for the RabbitMQ publisher in the WebSocket server.
+
+# Design Flaw Identified
+
+### Current Issue
+The `testRequestHandler.js` is tightly coupled to the WebSocket server, which violates the intended architecture. Handlers should not be directly invoked by the WebSocket server. Instead, they should operate as standalone services that listen for messages broadcast through RabbitMQ. Responses should be sent back through RabbitMQ to the WebSocket server, which will then transmit them to the React client.
+
+### Tasks to Address the Design Flaw
+
+#### Backend Developer Tasks
+- [ ] Refactor the WebSocket server to publish requests to RabbitMQ instead of directly invoking handlers.
+- [ ] Update the WebSocket server to listen for responses from RabbitMQ and relay them to the React client.
+- [ ] Remove direct coupling between the WebSocket server and `testRequestHandler.js`.
+
+#### Worker Service Developer Tasks
+- [ ] Implement a standalone worker service for `testRequestHandler.js` that listens for messages from RabbitMQ.
+- [ ] Ensure the worker service processes the request and publishes the response back to RabbitMQ with the original request ID.
+- [ ] Support streaming data by publishing chunks to RabbitMQ.
+
+#### Testing Tasks
+- [ ] Write integration tests to verify the end-to-end flow from the React client to the worker service and back.
+- [ ] Write unit tests for the RabbitMQ consumer in the worker service.
+- [ ] Write unit tests for the RabbitMQ publisher in the WebSocket server.
 
 
 
