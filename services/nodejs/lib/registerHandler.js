@@ -1,4 +1,4 @@
-import { connectRabbitMQ } from '../rabbitmq/connection.js';
+import { connectRabbitMQ } from '../../../backend/rabbitmq/connection.js';
 
 export default async function registerHandler({ eventName, handler }) {
   try {

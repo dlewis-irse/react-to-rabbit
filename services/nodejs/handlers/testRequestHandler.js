@@ -1,4 +1,4 @@
-import registerHandler from './registerHandler.js';
+import registerHandler from '../lib/registerHandler.js';
 
 registerHandler({
   eventName: 'testRequest',
