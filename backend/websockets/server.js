@@ -37,18 +37,22 @@ export async function startServer() {
             Buffer.from(JSON.stringify({ requestId, payload }))
           );
 
-          // Listen for the response from RabbitMQ
-          const consumeResponse = (msg) => {
-            const response = JSON.parse(msg.content.toString());
-            console.log('Received response from RabbitMQ:', { response, requestId });
-            if (response.requestId === requestId) {
-              ws.send(JSON.stringify(response));
-              channel.ack(msg);
-              channel.removeListener('message', consumeResponse);
-            }
-          };
+          // Use a unique consumer tag for each request to ensure proper cleanup
+          const consumerTag = `consumer-${requestId}`;
 
-          channel.consume(responseQueue, consumeResponse, { noAck: false });
+          await channel.consume(
+            responseQueue,
+            (msg) => {
+              const response = JSON.parse(msg.content.toString());
+              console.log('Received response from RabbitMQ:', response);
+              if (response.requestId === requestId) {
+                ws.send(JSON.stringify(response));
+                channel.ack(msg);
+                channel.cancel(consumerTag); // Remove the consumer after processing the response
+              }
+            },
+            { noAck: false, consumerTag }
+          );
         } catch (error) {
           console.error('Error handling message:', error);
           ws.send(JSON.stringify({ status: 'error', error: error.message }));
