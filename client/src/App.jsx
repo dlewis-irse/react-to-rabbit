@@ -10,11 +10,8 @@ function App() {
     setError(null);
     try {
       const result = await makeBackendRequest('testRequest', { key: 'value' }, (chunk) => {
-        // This was called
         console.log('Streaming chunk:', chunk);
       });
-      debugger;
-      //This is never getting called
       setResponse(result);
     } catch (err) {
       setError(err.message);

@@ -4,23 +4,6 @@
 
 The primary goal is to establish a clean and user-friendly pattern for a React application to trigger backend tasks (potentially long-running) and receive their results asynchronously. This system should abstract away the complexities of a message queue (RabbitMQ) and WebSocket communication (Socket.IO), presenting a request-response-like experience to the React developer. The backend transport layer (NodeJS) should be easily extensible to support various types of requests through a plugin architecture, and the worker services processing these requests should be implementable in different languages (specifically Python and NodeJS). The system must support sending and receiving full JSON objects and streaming data.
 
-## Current State
-
-### Backend
-- The WebSocket server is set up and routes requests to appropriate handlers.
-- The `testRequest` handler is implemented and simulates streaming data.
-- The `routeRequest` function passes the `sendChunk` function to handlers, enabling streaming responses.
-
-### Client
-- The client is set up using Vite and includes a testing interface in `App.jsx`.
-- The `makeBackendRequest` function is implemented and handles streaming data and final responses.
-- The WebSocket client utility is functional and integrated with the backend.
-
-### Issues Resolved
-- Fixed the issue where `sendChunk` was undefined in the `testRequest` handler.
-- Updated the backend to include `requestId` in responses, ensuring proper client-side handling.
-- Resolved the issue where the client was not receiving the final response from the backend.
-
 ## Coding Standards
 
 - Use Bun.js instead of Node.js for backend execution.
