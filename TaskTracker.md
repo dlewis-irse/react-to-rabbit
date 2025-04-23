@@ -1,15 +1,23 @@
 # Task Tracker
 
-## Project Goal Summary:
+## Project Goal Summary
 
 The primary goal is to establish a clean and user-friendly pattern for a React application to trigger backend tasks (potentially long-running) and receive their results asynchronously. This system should abstract away the complexities of a message queue (RabbitMQ) and WebSocket communication (Socket.IO), presenting a request-response-like experience to the React developer. The backend transport layer (NodeJS) should be easily extensible to support various types of requests through a plugin architecture, and the worker services processing these requests should be implementable in different languages (specifically Python and NodeJS). The system must support sending and receiving full JSON objects and streaming data.
 
 ## React Developer Tasks
 
+- [x] Set up client using Vite for development and build.
+- [x] Set up WebSocket client utility in the React app.
 - [ ] Implement `makeBackendRequest` function to send JSON payloads to the backend.
+- [ ] Integrate WebSocket client for communication with the backend.
 - [ ] Handle JSON responses and resolve Promises with backend results.
 - [ ] Support streaming data with a callback function for progressive updates.
 - [ ] Handle errors and reject Promises with error messages.
+- [ ] Test the `makeBackendRequest` function.
+- [ ] Document the `makeBackendRequest` API.
+- [ ] Handle streaming data in the UI.
+- [ ] Add error handling in the UI.
+- [ ] (Optional) Set up state management for handling complex state.
 
 ## Backend Developer Tasks
 
@@ -47,6 +55,7 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 - Use ES6 import syntax for all resource imports.
 - Follow Test Driven Development (TDD) for all implementations.
 - Write code in a reusable pattern whenever possible.
+- Avoid using classes; prefer functional programming patterns.
 
 ## Testing Standards
 

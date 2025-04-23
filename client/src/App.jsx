@@ -1,10 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
+import './App.css';
+import { makeBackendRequest } from './utils/makeBackendRequest';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const [response, setResponse] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleRequest = async () => {
+    setResponse(null);
+    setError(null);
+    try {
+      const result = await makeBackendRequest('testRequest', { key: 'value' }, (chunk) => {
+        console.log('Streaming chunk:', chunk);
+      });
+      setResponse(result);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
     <>
@@ -21,15 +37,17 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <button onClick={handleRequest} style={{ marginTop: '10px' }}>
+          Send Test Request
+        </button>
+        {response && <p>Response: {JSON.stringify(response)}</p>}
+        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

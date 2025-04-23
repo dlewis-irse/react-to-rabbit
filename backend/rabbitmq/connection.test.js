@@ -10,7 +10,8 @@ describe('connectRabbitMQ', () => {
     };
 
     mockConnect = jest.spyOn(amqp, 'connect').mockResolvedValue({
-      createChannel: jest.fn().mockResolvedValue(mockChannel)
+      createChannel: jest.fn().mockResolvedValue(mockChannel),
+      on: jest.fn()
     });
   });
 
