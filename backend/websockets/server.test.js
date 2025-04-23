@@ -1,13 +1,23 @@
 import { startServer } from './server.js';
 import WebSocket from 'ws';
+import amqp from 'amqplib';
 
 let server;
+let channel;
+let connection;
 
 beforeAll(async () => {
   server = await startServer();
+  connection = await amqp.connect('amqp://localhost');
+  channel = await connection.createChannel();
+
+  // Set up the response queue
+  await channel.assertQueue('websocket_responses', { durable: true });
 });
 
-afterAll(() => {
+afterAll(async () => {
+  await channel.close();
+  await connection.close();
   server.close();
 });
 
@@ -40,6 +50,34 @@ describe('WebSocket Server', () => {
         client.close();
         done();
       });
+    });
+
+    client.on('error', (err) => {
+      done(err);
+    });
+  });
+});
+
+describe('WebSocket Server Integration', () => {
+  it('should handle a full request-response flow', (done) => {
+    const client = new WebSocket(`ws://localhost:${process.env.VITE_SERVER_PORT || 8080}`);
+
+    client.on('open', () => {
+      const requestId = 'testRequest-123';
+      const message = JSON.stringify({
+        requestId,
+        requestType: 'testRequest',
+        payload: { key: 'value' },
+      });
+      client.send(message);
+    });
+
+    client.on('message', (data) => {
+      const response = JSON.parse(data);
+      expect(response.requestId).toBe('testRequest-123');
+      expect(response.data).toBeDefined();
+      client.close();
+      done();
     });
 
     client.on('error', (err) => {

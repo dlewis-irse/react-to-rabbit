@@ -9,9 +9,10 @@ function App() {
     setResponse(null);
     setError(null);
     try {
-      const result = await makeBackendRequest('testRequest', { key: 'value' }, (chunk) => {
+      const result = await makeBackendRequest('testRequest', { key: 'value' + Date.now() }, (chunk) => {
         console.log('Streaming chunk:', chunk);
       });
+      console.log('Final result:', result);
       setResponse(result);
     } catch (err) {
       setError(err.message);
@@ -24,7 +25,7 @@ function App() {
         Send Test Request
       </button>
       <div>
-        {response && <p>Response: {JSON.stringify(response)}</p>}
+        {response && <p style={{ color: 'white' }}>Response: {JSON.stringify(response)}</p>}
         {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       </div>
     </div>

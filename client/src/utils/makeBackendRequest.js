@@ -11,6 +11,7 @@ export function makeBackendRequest(requestType, payload, onStreamChunk) {
     // Handle streaming data if a callback is provided
     if (onStreamChunk) {
       client.onMessage(requestId, (chunk) => {
+        console.log('client.onMessage', chunk);
         if (chunk.isFinal) {
           client.removeMessageHandler(requestId);
           resolve(chunk.data);

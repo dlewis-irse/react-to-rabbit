@@ -1,9 +1,7 @@
 import { startServer } from './websockets/server.js';
-import { handleTestRequest } from './handlers/testRequestHandler.js';
 
-const requestHandlers = {
-  testRequest: handleTestRequest,
-};
+
+const requestHandlers = {}; // Updated to an empty object as handlers are now standalone services
 
 export function routeRequest(requestType, payload, sendChunk) {
   const handler = requestHandlers[requestType];

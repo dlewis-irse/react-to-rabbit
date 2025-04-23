@@ -7,7 +7,8 @@
   "scripts": {
     "backend": "bun --watch ./backend/index.js",
     "client": "vite -c ./client/vite.config.js",
-    "start": "concurrently -c blue,cyan \"npm:backend\" \"npm:client\"",
+    "handler": "bun --watch ./backend/handlers/testRequestHandler.js",
+    "start": "concurrently -c blue,cyan,green \"npm:backend\" \"npm:client\"",
     "test": "jest"
   },
   "dependencies": {

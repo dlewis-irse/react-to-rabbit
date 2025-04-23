@@ -1,6 +1,5 @@
 import WebSocket from 'ws';
 import { connectRabbitMQ } from '../rabbitmq/connection.js';
-import { routeRequest } from '../index.js';
 
 export async function startServer() {
   try {
@@ -9,6 +8,14 @@ export async function startServer() {
 
     // Connect to RabbitMQ
     const { connection, channel } = await connectRabbitMQ();
+
+    // Create a queue for responses
+    const responseQueue = 'websocket_responses';
+    await channel.assertQueue(responseQueue, { durable: true });
+
+    // Bind the response queue to the responses exchange
+    const responseExchange = 'responses';
+    await channel.bindQueue(responseQueue, responseExchange, '');
 
     wss.on('connection', (ws) => {
       console.log('Client connected');
@@ -20,11 +27,28 @@ export async function startServer() {
       ws.on('message', async (message) => {
         try {
           const request = JSON.parse(message.toString());
-          const { requestType, payload } = request;
-          const sendChunk = (chunk) => {
-            ws.send(JSON.stringify({ requestId: request.requestId, chunk }));
+          const { requestId, requestType, payload } = request;
+
+          console.log('Publishing request:', request);
+          // Publish the request to RabbitMQ
+          channel.publish(
+            'requests',
+            requestType,
+            Buffer.from(JSON.stringify({ requestId, payload }))
+          );
+
+          // Listen for the response from RabbitMQ
+          const consumeResponse = (msg) => {
+            const response = JSON.parse(msg.content.toString());
+            console.log('Received response from RabbitMQ:', { response, requestId });
+            if (response.requestId === requestId) {
+              ws.send(JSON.stringify(response));
+              channel.ack(msg);
+              channel.removeListener('message', consumeResponse);
+            }
           };
-          await routeRequest(requestType, payload, sendChunk);
+
+          channel.consume(responseQueue, consumeResponse, { noAck: false });
         } catch (error) {
           console.error('Error handling message:', error);
           ws.send(JSON.stringify({ status: 'error', error: error.message }));

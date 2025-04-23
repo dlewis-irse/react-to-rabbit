@@ -11,9 +11,9 @@ function createWebSocketClient(url) {
 
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
-            const { requestId, chunk } = message;
+            const { requestId, data } = message;
             if (messageHandlers.has(requestId)) {
-                messageHandlers.get(requestId)(chunk);
+                messageHandlers.get(requestId)(message);
             }
         };
 
