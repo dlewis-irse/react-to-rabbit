@@ -3,7 +3,7 @@ import { connectRabbitMQ } from '../rabbitmq/connection.js';
 
 export async function startServer () {
   try {
-    const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
+    const wss = new WebSocket.Server({ port: process.env.VITE_SERVER_PORT || 8080 });
 
     // Connect to RabbitMQ
     const { connection, channel } = await connectRabbitMQ();
