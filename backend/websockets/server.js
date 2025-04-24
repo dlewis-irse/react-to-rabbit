@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
-import { connectRabbitMQ } from '../rabbitmq/connection.js';
+import { connectRabbitMQ } from '../../shared/nodejs/rabbit-mq/connection.js';
 
-export async function startServer() {
+export async function startServer () {
   try {
     const wsPort = process.env.VITE_SERVER_PORT || 8080;
     const wss = new WebSocket.Server({ port: wsPort });
@@ -60,7 +60,7 @@ export async function startServer() {
       });
     });
 
-    console.log('WebSocket server running on *:' + wsPort);
+    console.log(`WebSocket server running on *:${wsPort}`);
     return wss;
   } catch (error) {
     console.error('Server failed to start:', error);

@@ -1,11 +1,11 @@
-import rabbitmqConfig from '../config/rabbitmq.js';
+import rabbitmqConfig from './rabbitmq-config.js';
 import amqp from 'amqplib';
 
 export async function connectRabbitMQ () {
   let connection;
   let channel;
 
-  async function createConnection() {
+  async function createConnection () {
     try {
       connection = await amqp.connect(rabbitmqConfig.url);
       channel = await connection.createChannel();
@@ -31,7 +31,7 @@ export async function connectRabbitMQ () {
     }
   }
 
-  async function reconnect() {
+  async function reconnect () {
     try {
       await createConnection();
     } catch (error) {
