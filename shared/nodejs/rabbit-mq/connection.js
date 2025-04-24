@@ -1,5 +1,6 @@
 import rabbitmqConfig from './rabbitmq-config.js';
 import amqp from 'amqplib';
+import { logger } from '@marketing/web-dev-node-config';
 
 export async function connectRabbitMQ () {
   let connection;
@@ -16,17 +17,17 @@ export async function connectRabbitMQ () {
       // Create response exchange
       await channel.assertExchange(rabbitmqConfig.responseExchange, 'direct', { durable: true });
 
-      console.log('RabbitMQ connection established');
+      logger.info('RabbitMQ connection established');
 
       // Handle connection close
       connection.on('close', async () => {
-        console.error('RabbitMQ connection closed. Attempting to reconnect...');
+        logger.error('RabbitMQ connection closed. Attempting to reconnect...');
         await reconnect();
       });
 
       return { connection, channel };
     } catch (error) {
-      console.error('RabbitMQ connection failed:', error);
+      logger.error('RabbitMQ connection failed:', error);
       throw error;
     }
   }
@@ -35,7 +36,7 @@ export async function connectRabbitMQ () {
     try {
       await createConnection();
     } catch (error) {
-      console.error('Reconnection attempt failed. Retrying in 5 seconds...', error);
+      logger.error('Reconnection attempt failed. Retrying in 5 seconds...', error);
       setTimeout(reconnect, 5000);
     }
   }

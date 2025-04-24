@@ -1,17 +1,18 @@
 import createWebSocketClient from './websocketClient';
+import logger from './loggerService.js';
 
 const serverPort = import.meta.env.VITE_SERVER_PORT || 8080;
 const client = createWebSocketClient(`ws://localhost:${serverPort}`);
 client.connect();
 
-export function makeBackendRequest(requestType, payload, onStreamChunk) {
+export function makeBackendRequest (requestType, payload, onStreamChunk) {
   return new Promise((resolve, reject) => {
     const requestId = `${requestType}-${Date.now()}`;
 
     // Handle streaming data if a callback is provided
     if (onStreamChunk) {
       client.onMessage(requestId, (chunk) => {
-        console.log('client.onMessage', chunk);
+        logger.info('client.onMessage', chunk);
         if (chunk.isFinal) {
           client.removeMessageHandler(requestId);
           resolve(chunk.data);

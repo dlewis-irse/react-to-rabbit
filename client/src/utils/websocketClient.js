@@ -1,12 +1,14 @@
-function createWebSocketClient(url) {
+import logger from './loggerService.js';
+
+function createWebSocketClient (url) {
     let socket = null;
     const messageHandlers = new Map();
 
-    function connect() {
+    function connect () {
         socket = new WebSocket(url);
 
         socket.onopen = () => {
-            console.log('WebSocket connection established');
+            logger.info('WebSocket connection established');
         };
 
         socket.onmessage = (event) => {
@@ -18,37 +20,37 @@ function createWebSocketClient(url) {
         };
 
         socket.onclose = () => {
-            console.error('WebSocket connection closed. Attempting to reconnect...');
+            logger.error('WebSocket connection closed. Attempting to reconnect...');
             setTimeout(() => {
-                console.log('Reconnecting WebSocket...');
+                logger.info('Reconnecting WebSocket...');
                 connect();
             }, 5000);
         };
 
         socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
+            logger.error('WebSocket error:', error);
         };
     }
 
-    function send(requestId, payload) {
+    function send (requestId, payload) {
         if (!socket) {
-            console.error('WebSocket is not initialized. Cannot send message.');
+            logger.error('WebSocket is not initialized. Cannot send message.');
             return;
         }
 
         if (socket.readyState !== WebSocket.OPEN) {
-            console.error('WebSocket is not open. Cannot send message.');
+            logger.error('WebSocket is not open. Cannot send message.');
             return;
         }
 
         socket.send(JSON.stringify({ requestId, ...payload }));
     }
 
-    function onMessage(requestId, handler) {
+    function onMessage (requestId, handler) {
         messageHandlers.set(requestId, handler);
     }
 
-    function removeMessageHandler(requestId) {
+    function removeMessageHandler (requestId) {
         messageHandlers.delete(requestId);
     }
 
@@ -56,7 +58,7 @@ function createWebSocketClient(url) {
         connect,
         send,
         onMessage,
-        removeMessageHandler,
+        removeMessageHandler
     };
 }
 
