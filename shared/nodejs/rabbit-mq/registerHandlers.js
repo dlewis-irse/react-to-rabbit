@@ -1,7 +1,17 @@
+import { applicationInitializer } from '@marketing/web-dev-node-config';
 import { connectRabbitMQ } from './connection.js';
 
 export default async function registerHandlers (handlers) {
   try {
+    const { logger } = await applicationInitializer.init({
+      localConfigPath: './credentials.json',
+      secretKey: process.env.SECRET_KEY,
+      secretRegion: 'us-west-2',
+      mongoConnectionString: process.env.MONGO_CONNECTION_STRING,
+      loggerAppName: process.env.VITE_APPLICATION_NAME,
+      mongoCollections: []
+    });
+
     const { channel } = await connectRabbitMQ();
 
     for (const { eventName, handler } of handlers) {
@@ -13,7 +23,7 @@ export default async function registerHandlers (handlers) {
       const exchange = 'requests';
       await channel.bindQueue(queue, exchange, eventName);
 
-      console.log(`Handler registered for event: ${eventName}`);
+      logger.info(`Handler registered for event: ${eventName}`);
 
       // Consume messages from the queue
       channel.consume(queue, async (msg) => {
@@ -35,7 +45,7 @@ export default async function registerHandlers (handlers) {
             Buffer.from(JSON.stringify({ requestId, data: finalData, isFinal: true }))
           );
         } catch (error) {
-          console.error(`Error in handler for event ${eventName}:`, error);
+          logger.error(`Error in handler for event ${eventName}:`, error);
           channel.publish(
             'responses',
             '',
@@ -47,7 +57,9 @@ export default async function registerHandlers (handlers) {
       });
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Failed to register handlers:', error);
+    // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
 }
