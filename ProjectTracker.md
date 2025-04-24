@@ -31,8 +31,8 @@ The primary goal is to establish a clean and user-friendly pattern for a React a
 
 ### Backend Developer Tasks
 
-- [ ] Add logging for RabbitMQ and WebSocket server events using a logging library.
-- [ ] Add configuration validation to ensure correct settings at startup, such as RabbitMQ URLs and exchange names.
+- [x] Add logging for RabbitMQ and WebSocket server events using a logging library.
+- [x] Add configuration validation to ensure correct settings at startup, such as RabbitMQ URLs and exchange names.
 
 ### Multi-Language Support
 

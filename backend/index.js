@@ -1,6 +1,10 @@
 import WebSocket from 'ws';
 import { applicationInitializer } from '@marketing/web-dev-node-config';
 import { connectRabbitMQ } from '../shared/nodejs/rabbit-mq/connection.js';
+import { validateConfig } from '../shared/nodejs/validateConfig.js';
+
+// Validate configuration before starting the application
+validateConfig();
 
 try {
   const { logger } = await applicationInitializer.init({
