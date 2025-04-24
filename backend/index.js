@@ -10,7 +10,7 @@ try {
     mongoConnectionString: process.env.MONGO_CONNECTION_STRING,
     loggerAppName: process.env.VITE_APPLICATION_NAME,
     mongoCollections: []
-});
+  });
 
   const wsPort = process.env.VITE_SERVER_PORT || 8080;
   const wss = new WebSocket.Server({ port: wsPort });
@@ -38,7 +38,13 @@ try {
         const request = JSON.parse(message.toString());
         const { requestId, requestType, payload } = request;
 
-        logger.info('Publishing request:', request);
+        if (requestId === 'client-log') {
+          logger[request.level](request.message);
+          return;
+        }
+
+
+        logger.info(`Publishing request:${JSON.stringify(request)}`);
         // Publish the request to RabbitMQ
         channel.publish(
           'requests',
@@ -53,11 +59,11 @@ try {
           responseQueue,
           (msg) => {
             const response = JSON.parse(msg.content.toString());
-            logger.info('Received response from RabbitMQ:', response);
+            logger.info(`Received response from RabbitMQ:${JSON.stringify(response)}`);
             if (response.requestId === requestId) {
               ws.send(JSON.stringify(response));
               channel.ack(msg);
-              channel.cancel(consumerTag); // Remove the consumer after processing the response
+              channel.cancel(consumerTag);
             }
           },
           { noAck: false, consumerTag }
