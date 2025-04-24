@@ -1,11 +1,6 @@
-import { credentials } from '@marketing/web-dev-node-config';
-
-// Utility function to validate required environment variables
-export function validateConfig () {
+export function validateConfig (credentials) {
     const requiredEnvVars = [
         'RABBITMQ_URL',
-        'SECRET_KEY',
-
         'VITE_APPLICATION_NAME',
         'VITE_SERVER_PORT'
     ];

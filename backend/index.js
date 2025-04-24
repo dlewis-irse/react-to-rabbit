@@ -3,11 +3,8 @@ import { applicationInitializer } from '@marketing/web-dev-node-config';
 import { connectRabbitMQ } from '../shared/nodejs/rabbit-mq/connection.js';
 import { validateConfig } from '../shared/nodejs/validateConfig.js';
 
-// Validate configuration before starting the application
-validateConfig();
-
 try {
-  const { logger } = await applicationInitializer.init({
+  const { credentials, logger } = await applicationInitializer.init({
     localConfigPath: './credentials.json',
     secretKey: process.env.SECRET_KEY,
     secretRegion: 'us-west-2',
@@ -15,6 +12,8 @@ try {
     loggerAppName: process.env.VITE_APPLICATION_NAME,
     mongoCollections: []
   });
+
+  validateConfig(credentials);
 
   const wsPort = process.env.VITE_SERVER_PORT || 8080;
   const wss = new WebSocket.Server({ port: wsPort });
