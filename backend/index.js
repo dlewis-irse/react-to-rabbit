@@ -52,7 +52,10 @@ try {
         channel.publish(
           'requests',
           requestType,
-          Buffer.from(JSON.stringify({ requestId, payload }))
+          Buffer.from(JSON.stringify({ requestId, payload })),
+          {
+            replyTo: responseQueue
+          }
         );
 
         // Use a unique consumer tag for each request to ensure proper cleanup
