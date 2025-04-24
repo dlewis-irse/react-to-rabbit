@@ -47,7 +47,7 @@ try {
         );
 
         // Use a unique consumer tag for each request to ensure proper cleanup
-        const consumerTag = `consumer-${requestId}`;
+        const consumerTag = `consumer-${requestId}-${Date.now()}`;
 
         await channel.consume(
           responseQueue,

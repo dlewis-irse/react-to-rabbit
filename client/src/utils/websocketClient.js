@@ -1,5 +1,3 @@
-import logger from './loggerService.js';
-
 function createWebSocketClient (url) {
     let socket = null;
     const messageHandlers = new Map();
@@ -8,7 +6,7 @@ function createWebSocketClient (url) {
         socket = new WebSocket(url);
 
         socket.onopen = () => {
-            logger.info('WebSocket connection established');
+            console.log('WebSocket connection established');
         };
 
         socket.onmessage = (event) => {
@@ -20,9 +18,9 @@ function createWebSocketClient (url) {
         };
 
         socket.onclose = () => {
-            logger.error('WebSocket connection closed. Attempting to reconnect...');
+            console.error('WebSocket connection closed. Attempting to reconnect...');
             setTimeout(() => {
-                logger.info('Reconnecting WebSocket...');
+                console.log('Reconnecting WebSocket...');
                 connect();
             }, 5000);
         };
