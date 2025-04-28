@@ -5,11 +5,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "backend": "bun --watch ./backend/index.js",
+    "socket-io-server": "bun --watch ./socket-io-server/socket-io-server.js",
     "client": "vite -c ./client/vite.config.js",
-    "handler": "bun --watch ./services/nodejs/handlers/testRequestHandler.js",
-    "start": "concurrently -c blue,cyan,green \"npm:backend\" \"npm:client\"",
-    "test": "jest"
+    "start": "concurrently -c blue,cyan,green \"npm:socket-io-server\" \"npm:client\"",
+    "test": "jest",
+    "handler": "bun --watch ./services/nodejs/handlers/test-request-handler.js"
   },
   "dependencies": {
     "@marketing/web-dev-node-config": "^1.3.17",

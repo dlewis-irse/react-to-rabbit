@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { applicationInitializer } from '@marketing/web-dev-node-config';
-import { connectRabbitMQ } from '../shared/nodejs/rabbit-mq/connection.js';
+import { connectRabbitMQ } from '../shared/nodejs/rabbit-mq/init-rabbit-mq-connection.js';
 import { validateConfig } from '../shared/nodejs/validateConfig.js';
 
 try {
@@ -29,6 +29,8 @@ try {
   const responseExchange = 'responses';
   await channel.bindQueue(responseQueue, responseExchange, '');
 
+  const pendingRequests = [];
+
   wss.on('connection', (ws) => {
     logger.info('Client connected');
 
@@ -45,6 +47,8 @@ try {
           logger[request.level](request.message);
           return;
         }
+
+        pendingRequests.push(request);
 
 
         logger.info(`Publishing request:${JSON.stringify(request)}`);

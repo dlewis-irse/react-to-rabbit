@@ -5,9 +5,9 @@ const serverPort = import.meta.env.VITE_SERVER_PORT || 8080;
 const client = createWebSocketClient(`ws://localhost:${serverPort}`);
 client.connect();
 
-export function makeBackendRequest (requestType, payload, onStreamChunk) {
+export function makeBackendRequest (eventName, payload, onStreamChunk) {
   return new Promise((resolve, reject) => {
-    const requestId = `${requestType}-${Date.now()}`;
+    const requestId = `${eventName}-${Date.now()}`;
 
     // Handle streaming data if a callback is provided
     if (onStreamChunk) {
@@ -29,7 +29,7 @@ export function makeBackendRequest (requestType, payload, onStreamChunk) {
 
     // Send the request to the backend
     try {
-      client.send(requestId, { requestType, payload });
+      client.send(requestId, { eventName, payload });
     } catch (error) {
       client.removeMessageHandler(requestId);
       reject(error);
