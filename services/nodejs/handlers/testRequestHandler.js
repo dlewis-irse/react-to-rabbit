@@ -8,11 +8,11 @@ registerHandlers([
       logger.info('Processing testRequest with payload:', payload);
 
       // Simulate streaming data
-      sendChunk({ data: 'Chunk 1' });
-      sendChunk({ data: 'Chunk 2' });
+      sendChunk('Chunk 1');
+      sendChunk('Chunk 2');
 
       // Return final data
-      return { data: 'Final Chunk' };
+      return 'Final Chunk';
     }
   }
 ]);
