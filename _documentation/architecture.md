@@ -1,63 +1,101 @@
 # Architecture Overview
 
-## Client Communication with the Backend
+## System Components
 
-### WebSocket Communication
-- The client uses a WebSocket connection to communicate with the backend. This is implemented in the `websocketClient.js` utility.
-- The `websocketClient` establishes a persistent WebSocket connection to the backend server and provides methods to send messages and handle responses.
+### Client Application
+- React-based frontend application
+- Uses WebSocket for real-time communication
+- Implements a clean request-response pattern through `makeBackendRequest` utility
+- Handles asynchronous responses and streaming data
 
-### Backend Requests
-- The `makeBackendRequest.js` utility is used to send requests from the client to the backend.
-- It generates a unique `requestId` for each request and sends it through the WebSocket connection along with the `requestType` and `payload`.
-- The backend processes the request and sends responses back to the client, which are handled by the `onMessage` callback in the `websocketClient`.
+### Backend Services
+- **Socket.IO Server**: Acts as a bridge between client and message queue
+  - Handles WebSocket connections
+  - Routes requests to RabbitMQ
+  - Manages response delivery to clients
+- **Worker Services**: Standalone services that process requests
+  - Communicate exclusively through RabbitMQ
+  - Implement plugin architecture for extensibility
+  - Process requests asynchronously
 
-### Client Logging
-- The `loggerService.js` utility sends client-side logs to the backend using the `websocketClient`. Logs are sent as `client-log` events, which are processed by the backend's Socket.IO server.
+### Message Queue (RabbitMQ)
+- Central message broker for the system
+- Handles request routing and response delivery
+- Ensures loose coupling between components
+- Supports full JSON object transmission and streaming data
 
----
+## Communication Flow
 
-## Backend Communication with RabbitMQ
+### Client to Backend
+1. Client initiates request using `makeBackendRequest`
+2. Request is sent through WebSocket connection
+3. Socket.IO server receives request and publishes to RabbitMQ
+4. Worker service processes request and publishes response
+5. Response is routed back to client through WebSocket
 
-### WebSocket Server
-- The backend WebSocket server listens for messages from the client.
-- When a message is received, it is parsed to extract the `requestId`, `requestType`, and `payload`.
-- The backend publishes the request to RabbitMQ's `requests` exchange using the `requestType` as the routing key.
+### Backend to Worker Services
+1. Requests are published to RabbitMQ exchange
+2. Worker services consume requests based on routing keys
+3. Processing results are published back to response queue
+4. Socket.IO server delivers responses to appropriate clients
 
-### RabbitMQ Integration
-- The RabbitMQ connection is managed by the `connection.js` file in the `shared/nodejs/rabbit-mq` directory.
-- The backend publishes messages to the `requests` exchange and listens for responses on the `responses` exchange.
+## Key Components
 
-### Response Handling
-- The backend consumes messages from the `responses` queue in RabbitMQ.
-- When a response is received, it is matched with the original `requestId` and sent back to the client through the WebSocket connection.
-
----
-
-## Worker Services
-
-### Handler Registration
-- Worker services use the `registerHandlers.js` utility to register event handlers for specific `requestType` events.
-- Each handler processes messages from RabbitMQ and sends responses back to the `responses` exchange.
-
-### Example Handler
-- The `testRequestHandler.js` file demonstrates how a worker service processes a `testRequest` event.
-- It sends intermediate chunks of data using the `sendChunk` function and a final response when processing is complete.
-
----
-
-## Summary of Flow
-
-### Client
-- Sends a request via WebSocket using `makeBackendRequest`.
-- Logs events using `loggerService`.
+### Client-Side
+- `websocketClient.js`: Manages WebSocket connection
+- `makeBackendRequest.js`: Provides request-response interface
+- `loggerService.js`: Handles client-side logging
 
 ### Backend
-- Receives the request via WebSocket.
-- Publishes the request to RabbitMQ's `requests` exchange.
-- Listens for responses on the `responses` queue and sends them back to the client.
+- `socket-io-server.js`: WebSocket server implementation
+- `backend/index.js`: Main backend service
+- `shared/nodejs/rabbit-mq/`: RabbitMQ utilities
+  - `connection.js`: RabbitMQ connection management
+  - `registerHandlers.js`: Service handler registration
 
 ### Worker Services
-- Consume messages from RabbitMQ's `requests` exchange.
-- Process the request and publish responses to the `responses` exchange.
+- Standalone services that implement specific business logic
+- Use `registerHandlers.js` for request processing
+- Communicate through RabbitMQ queues
 
-This architecture ensures asynchronous communication between the client, backend, and worker services, with RabbitMQ acting as the message broker.
+## Development Standards
+
+- Use Bun.js for backend execution
+- Follow ES6 import syntax
+- Implement functional programming patterns
+- Maintain loose coupling between components
+- Support extensibility through plugin architecture
+
+## Data Flow
+
+1. **Request Initiation**
+   - Client creates request with unique ID
+   - Request includes type and payload
+   - WebSocket connection established if needed
+
+2. **Request Processing**
+   - Socket.IO server receives request
+   - Request published to RabbitMQ
+   - Worker service processes request
+   - Response generated and published
+
+3. **Response Delivery**
+   - Response routed through RabbitMQ
+   - Socket.IO server delivers to client
+   - Client handles response through callback
+
+## Error Handling
+
+- WebSocket connection management
+- RabbitMQ connection recovery
+- Request timeout handling
+- Error propagation to clients
+- Logging and monitoring
+
+## Security Considerations
+
+- WebSocket connection security
+- RabbitMQ access control
+- Request validation
+- Response sanitization
+- Error message handling
