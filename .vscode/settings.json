@@ -1,5 +1,11 @@
 {
     "cSpell.words": [
         "rabbitmq"
-    ]
+    ],
+    "python.defaultInterpreterPath": "/home/dani7770/.cache/pypoetry/virtualenvs/rabbit-service-Ki3RUlyv-py3.12/bin/python",
+    "python.analysis.extraPaths": [
+        "/home/dani7770/PlayGround/react-to-rabbit/services/python"
+    ],
+    "python.terminal.activateEnvironment": true,
+    "python.poetryPath": "poetry"
 }

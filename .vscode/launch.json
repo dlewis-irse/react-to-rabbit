@@ -8,13 +8,14 @@
             "name": "Python: RabbitMQ Service",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/services/python/run.py",
+            "program": "${workspaceFolder}/services/python/rabbit_service/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/services/python"
             },
-            "cwd": "${workspaceFolder}/services/python"
+            "cwd": "${workspaceFolder}/services/python",
+            "python": "/home/dani7770/.cache/pypoetry/virtualenvs/rabbit-service-Ki3RUlyv-py3.12/bin/python"
         }
     ]
 }
