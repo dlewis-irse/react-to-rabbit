@@ -11,19 +11,22 @@ from rabbit_service.rabbit import register_handlers
 logger = logging.getLogger(__name__)
 
 async def test_request_handler(
-    payload: Dict[str, Any],
-    send_chunk: Callable[[Any], Awaitable[None]]
+    context: Dict[str, Any]
 ) -> str:
     """
     Test handler that demonstrates streaming functionality.
     
     Args:
-        payload: The request payload data
-        send_chunk: Async function to send intermediate data chunks
+        context: Dictionary containing:
+            - payload: The request payload data
+            - sendChunk: Async function to send intermediate data chunks
     
     Returns:
         str: Final response message
     """
+    payload = context['payload']
+    send_chunk = context['sendChunk']
+    
     logger.info(f"Processing testRequest with payload: {json.dumps(payload)}")
     
     # Simulate streaming data

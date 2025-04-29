@@ -5,7 +5,7 @@ import asyncio
 import logging
 
 from rabbit_service.handlers.test_handler import test_request_handler
-from rabbit_service.rabbit import register_handlers
+from rabbit_service.register_handlers import register_handlers
 
 # Configure logging
 logging.basicConfig(
