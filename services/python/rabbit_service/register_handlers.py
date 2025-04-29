@@ -29,19 +29,19 @@ async def register_handlers(handlers: List[Dict[str, Any]] = []):
         logger.info(f"Handler Orchestrator Received request from RabbitMQ: {json.dumps(msg)}")
         
         for handler_info in handlers:
-            if handler_info['eventName'] == msg['eventName']:
-                async def send_chunk(chunk: Any):
-                    message = {
-                        'requestId': msg['requestId'],
-                        'data': chunk,
-                        'isFinal': False
-                    }
-                    logger.info(f"Sending chunk: {json.dumps(message)}")
-                    await rabbit_mq['send_message_to_response_queue'](message)
-
+            if handler_info['eventName'] == msg.get('eventName'):
                 try:
+                    async def send_chunk(chunk: Any):
+                        message = {
+                            'requestId': msg['requestId'],
+                            'data': chunk,
+                            'isFinal': False
+                        }
+                        logger.info(f"Sending chunk: {json.dumps(message)}")
+                        await rabbit_mq['send_message_to_response_queue'](message)
+
                     final_result = await handler_info['handler']({
-                        'payload': msg['payload'],
+                        'payload': msg.get('payload', {}),
                         'sendChunk': send_chunk
                     })
 

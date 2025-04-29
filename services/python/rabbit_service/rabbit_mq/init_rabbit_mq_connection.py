@@ -34,7 +34,7 @@ def convert_message_to_object(message: aio_pika.IncomingMessage) -> Any:
 async def establish_exchange(
     connection: AbstractConnection,
     exchange_name: str,
-    is_fanout: bool = False,
+    fanout: bool = False,
     on_exchange_message: Callable = None
 ) -> Callable:
     """
@@ -43,7 +43,7 @@ async def establish_exchange(
     Args:
         connection: RabbitMQ connection
         exchange_name: Name of the exchange
-        is_fanout: Whether this is a fanout exchange
+        fanout: Whether this is a fanout exchange
         on_exchange_message: Callback for received messages
     
     Returns:
@@ -52,11 +52,18 @@ async def establish_exchange(
     exchange_channel = await connection.channel()
     
     # Create the exchange
-    exchange = await exchange_channel.declare_exchange(
-        exchange_name,
-        type="fanout" if is_fanout else "direct",
-        durable=False
-    )
+    if fanout:
+        exchange = await exchange_channel.declare_exchange(
+            exchange_name,
+            type=aio_pika.ExchangeType.FANOUT,
+            durable=False
+        )
+    else:
+        exchange = await exchange_channel.declare_exchange(
+            exchange_name,
+            type=aio_pika.ExchangeType.DIRECT,
+            durable=False
+        )
     
     # Create an exclusive queue for this exchange
     exchange_listener_queue = await exchange_channel.declare_queue(
@@ -69,10 +76,14 @@ async def establish_exchange(
 
     if on_exchange_message:
         async def process_message(message: aio_pika.IncomingMessage):
-            async with message.process():
+            async with message.process(requeue=False):
                 try:
                     msg_object = convert_message_to_object(message)
-                    await on_exchange_message(msg_object)
+                    for handler in on_exchange_message:
+                        try:
+                            await handler(msg_object)
+                        except Exception as e:
+                            logger.error(f"Error in exchange message handler: {str(e)}")
                 except Exception as e:
                     logger.error(f"Error processing exchange message: {str(e)}")
 
@@ -81,7 +92,10 @@ async def establish_exchange(
     async def post_message_to_exchange(payload: Any = {}):
         """Post a message to the exchange."""
         await exchange.publish(
-            aio_pika.Message(body=convert_payload_to_bytes(payload)),
+            aio_pika.Message(
+                body=convert_payload_to_bytes(payload),
+                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+            ),
             routing_key=""  # Empty routing key as per spec
         )
     
@@ -106,9 +120,7 @@ async def init_rabbit_mq_connection():
         send_message_to_request_queue = await establish_exchange(
             connection,
             os.getenv("RABBITMQ_REQUEST_EXCHANGE", "requests"),
-            on_exchange_message=lambda msg: [
-                handler(msg) for handler in request_handlers
-            ]
+            on_exchange_message=request_handlers
         )
 
         def register_request_queue_handler(handler: Callable):
@@ -121,10 +133,8 @@ async def init_rabbit_mq_connection():
         send_message_to_response_queue = await establish_exchange(
             connection,
             os.getenv("RABBITMQ_RESPONSE_EXCHANGE", "responses"),
-            is_fanout=True,
-            on_exchange_message=lambda msg: [
-                handler(msg) for handler in response_handlers
-            ]
+            fanout=True,
+            on_exchange_message=response_handlers
         )
 
         def register_response_queue_handler(handler: Callable):
